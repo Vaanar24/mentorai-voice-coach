@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Environment, PerspectiveCamera } from '@react-three/drei';
+import { OrbitControls, Environment, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface Avatar3DProps {
@@ -9,37 +9,13 @@ interface Avatar3DProps {
   onAvatarClick?: () => void;
 }
 
-// Arm Component for realistic movement
-function ArmComponent({ isSpeaking, isLeft }: { isSpeaking: boolean; isLeft: boolean }) {
-  const armRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (!armRef.current) return;
-    
-    const time = state.clock.elapsedTime;
-    const baseRotation = isLeft ? 0.2 : -0.2;
-    const speakingAnimation = isSpeaking ? Math.sin(time * (isLeft ? 2 : 2.3)) * 0.1 : 0;
-    
-    armRef.current.rotation.z = baseRotation + (isLeft ? speakingAnimation : -speakingAnimation);
-  });
-
-  return (
-    <mesh 
-      ref={armRef}
-      position={[isLeft ? -0.5 : 0.5, 1.1, 0]} 
-      rotation={[0, 0, isLeft ? 0.2 : -0.2]}
-    >
-      <cylinderGeometry args={[0.08, 0.1, 0.9, 16]} />
-      <meshStandardMaterial color="#F5E6D3" roughness={0.15} metalness={0.02} />
-    </mesh>
-  );
-}
-
 // 3D Avatar Model Component
 function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListening: boolean }) {
   const meshRef = useRef<THREE.Group>(null);
   const headRef = useRef<THREE.Group>(null);
   const eyesRef = useRef<THREE.Group>(null);
+  const leftArmRef = useRef<THREE.Mesh>(null);
+  const rightArmRef = useRef<THREE.Mesh>(null);
   const [blinkTimer, setBlinkTimer] = useState(0);
   const [expressionIntensity, setExpressionIntensity] = useState(0);
 
@@ -85,6 +61,19 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
     const mouseInfluence = 0.02;
     eyesRef.current.rotation.x = Math.sin(time * 0.1) * mouseInfluence;
     eyesRef.current.rotation.y = Math.cos(time * 0.15) * mouseInfluence;
+
+    // Arm animations
+    if (leftArmRef.current) {
+      const baseRotation = 0.2;
+      const speakingAnimation = isSpeaking ? Math.sin(time * 2) * 0.1 : 0;
+      leftArmRef.current.rotation.z = baseRotation + speakingAnimation;
+    }
+
+    if (rightArmRef.current) {
+      const baseRotation = -0.2;
+      const speakingAnimation = isSpeaking ? Math.sin(time * 2.3) * 0.1 : 0;
+      rightArmRef.current.rotation.z = baseRotation - speakingAnimation;
+    }
   });
 
   return (
@@ -98,7 +87,6 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
             color="#F5E6D3" 
             roughness={0.15}
             metalness={0.02}
-            normalScale={new THREE.Vector2(0.1, 0.1)}
           />
         </mesh>
 
@@ -294,9 +282,23 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
         />
       </mesh>
 
-      {/* Arms with more realistic movement */}
-      <ArmComponent isSpeaking={isSpeaking} isLeft={true} />
-      <ArmComponent isSpeaking={isSpeaking} isLeft={false} />
+      {/* Arms with realistic movement */}
+      <mesh 
+        ref={leftArmRef}
+        position={[-0.5, 1.1, 0]} 
+        rotation={[0, 0, 0.2]}
+      >
+        <cylinderGeometry args={[0.08, 0.1, 0.9, 16]} />
+        <meshStandardMaterial color="#F5E6D3" roughness={0.15} metalness={0.02} />
+      </mesh>
+      <mesh 
+        ref={rightArmRef}
+        position={[0.5, 1.1, 0]} 
+        rotation={[0, 0, -0.2]}
+      >
+        <cylinderGeometry args={[0.08, 0.1, 0.9, 16]} />
+        <meshStandardMaterial color="#F5E6D3" roughness={0.15} metalness={0.02} />
+      </mesh>
 
       {/* Hands with finger details */}
       <mesh position={[-0.65, 0.5, 0]}>
