@@ -147,15 +147,21 @@ export const MentorAIInterface = () => {
 
   const startElevenLabsConversation = async () => {
     try {
+      console.log("Requesting microphone access...");
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      await conversation.startSession({
+      
+      console.log("Starting ElevenLabs conversation with agent ID:", "agent_3201k24jd1w3fk99s1efmtyf6a2v");
+      const conversationId = await conversation.startSession({
         agentId: "agent_3201k24jd1w3fk99s1efmtyf6a2v"
       });
+      
+      console.log("Conversation started successfully, ID:", conversationId);
+      
     } catch (error) {
       console.error("Failed to start conversation:", error);
       toast({
-        title: "Microphone Error",
-        description: "Please allow microphone access to use voice chat",
+        title: "Connection Error",
+        description: error instanceof Error ? error.message : "Failed to start conversation",
         variant: "destructive"
       });
     }
