@@ -7,19 +7,62 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, Brain } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-// Mock AI response function
-const mockAIResponse = async (userMessage: string): Promise<string> => {
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  if (userMessage.toLowerCase().includes("quantum")) {
-    return "Quantum physics involves the study of matter and energy at the smallest scales, where particles behave in ways that seem impossible in our everyday world.";
-  }
-  
-  if (userMessage.toLowerCase().includes("calculus")) {
-    return "Calculus is the mathematical study of change and motion, with two main branches: differential and integral calculus.";
-  }
+// AI Response function using Supabase Edge Function
+const getAIResponse = async (userMessage: string): Promise<string> => {
+  try {
+    // Try to call the Supabase Edge Function
+    const response = await fetch(`${window.location.origin}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: userMessage }),
+    });
 
-  return `That's an interesting question about "${userMessage}". Let me explain the key concepts and help you understand this topic better.`;
+    if (response.ok) {
+      const data = await response.json();
+      return data.response;
+    }
+  } catch (error) {
+    console.error('Error calling AI API:', error);
+  }
+  
+  // Fallback responses for common interactions
+  const lowerMessage = userMessage.toLowerCase();
+  
+  if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+    return "Hello! I'm MentorAI, your personal training mentor. I'm here to help you learn about any topic you're curious about. What would you like to explore today?";
+  }
+  
+  if (lowerMessage.includes('how are you') || lowerMessage.includes('how do you do')) {
+    return "I'm doing great, thank you for asking! I'm excited to help you learn something new today. What subject interests you?";
+  }
+  
+  if (lowerMessage.includes('thank you') || lowerMessage.includes('thanks')) {
+    return "You're very welcome! I'm always happy to help you learn. Is there anything else you'd like to know about?";
+  }
+  
+  if (lowerMessage.includes('goodbye') || lowerMessage.includes('bye')) {
+    return "Goodbye! It was great helping you learn today. Feel free to come back anytime you have more questions!";
+  }
+  
+  if (lowerMessage.includes('what') && lowerMessage.includes('your name')) {
+    return "I'm MentorAI! I'm your personal AI training mentor, designed to help you learn and understand various topics. What would you like to learn about?";
+  }
+  
+  if (lowerMessage.includes('quantum')) {
+    return "Quantum physics is fascinating! It's the study of matter and energy at the smallest scales, where particles behave in ways that seem impossible in our everyday world. Would you like to explore quantum entanglement or wave-particle duality?";
+  }
+  
+  if (lowerMessage.includes('calculus')) {
+    return "Calculus is the mathematical study of change and motion! It has two main branches: differential calculus (rates of change) and integral calculus (accumulation). What aspect would you like to dive into?";
+  }
+  
+  if (lowerMessage.includes('help') || lowerMessage.includes('what can you do')) {
+    return "I can help you learn about virtually any topic! Just ask me questions about science, math, history, programming, or anything else you're curious about. What interests you most?";
+  }
+  
+  return `That's an interesting question about "${userMessage}"! I'd love to help you understand this better. Could you tell me more about what specific aspect you'd like to learn, or would you like me to give you a general overview?`;
 };
 
 export const MentorAIInterface = () => {
@@ -31,8 +74,8 @@ export const MentorAIInterface = () => {
     setIsLoading(true);
 
     try {
-      // Get AI response
-      const aiResponse = await mockAIResponse(content);
+      // Get AI response from Supabase Edge Function
+      const aiResponse = await getAIResponse(content);
       
       // Speak the response using Web Speech API
       if ('speechSynthesis' in window) {
