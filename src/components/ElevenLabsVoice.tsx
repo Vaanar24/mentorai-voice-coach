@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useConversation } from "@11labs/react";
 import { toast } from "@/hooks/use-toast";
 
 interface ElevenLabsVoiceProps {
@@ -13,104 +12,141 @@ export const ElevenLabsVoice = ({
   onListeningChange, 
   onTranscript 
 }: ElevenLabsVoiceProps) => {
-  const [apiKey, setApiKey] = useState<string>("");
-  const [agentId, setAgentId] = useState<string>("");
-  const [isConfigured, setIsConfigured] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const conversation = useConversation({
-    onConnect: () => {
-      console.log("Connected to ElevenLabs");
-      toast({
-        title: "Voice Connected",
-        description: "You can now speak with MentorAI using voice."
-      });
-    },
-    onDisconnect: () => {
-      console.log("Disconnected from ElevenLabs");
-      onSpeakingChange(false);
-      onListeningChange(false);
-    },
-    onMessage: (message) => {
-      console.log("Message received:", message);
-      if (message.source === "user" && message.message) {
-        onTranscript(message.message);
+  // Text-to-Speech using Web Speech API as fallback
+  const speak = (text: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      utterance.onstart = () => {
+        onSpeakingChange(true);
+      };
+      
+      utterance.onend = () => {
+        onSpeakingChange(false);
+      };
+      
+      utterance.onerror = () => {
+        onSpeakingChange(false);
+        toast({
+          title: "Speech Error",
+          description: "Unable to play voice. Please check your browser settings.",
+          variant: "destructive"
+        });
+      };
+
+      // Configure voice settings
+      const voices = speechSynthesis.getVoices();
+      const preferredVoice = voices.find(voice => 
+        voice.name.includes('Google') || 
+        voice.name.includes('Microsoft') ||
+        voice.lang.startsWith('en')
+      );
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
       }
-    },
-    onError: (error) => {
-      console.error("ElevenLabs error:", error);
+      
+      utterance.rate = 0.9;
+      utterance.pitch = 1.1;
+      utterance.volume = 0.8;
+
+      speechSynthesis.speak(utterance);
+    } else {
       toast({
-        title: "Voice Error",
-        description: "There was an issue with the voice connection.",
+        title: "Speech Not Supported",
+        description: "Your browser doesn't support text-to-speech.",
         variant: "destructive"
       });
     }
-  });
+  };
 
-  useEffect(() => {
-    if (conversation.isSpeaking !== undefined) {
-      onSpeakingChange(conversation.isSpeaking);
+  // Speech-to-Text using Web Speech API
+  const startListening = () => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      const recognition = new SpeechRecognition();
+      
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        onListeningChange(true);
+        toast({
+          title: "Listening",
+          description: "Speak now..."
+        });
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        onTranscript(transcript);
+        onListeningChange(false);
+      };
+
+      recognition.onerror = (event: any) => {
+        onListeningChange(false);
+        console.error('Speech recognition error:', event.error);
+        
+        if (event.error === 'not-allowed') {
+          toast({
+            title: "Microphone Access Denied",
+            description: "Please allow microphone access to use voice features.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Speech Recognition Error",
+            description: `Error: ${event.error}`,
+            variant: "destructive"
+          });
+        }
+      };
+
+      recognition.onend = () => {
+        onListeningChange(false);
+      };
+
+      recognition.start();
+      
+      // Auto-stop after 10 seconds
+      setTimeout(() => {
+        try {
+          recognition.stop();
+        } catch (e) {
+          // Recognition may already be stopped
+        }
+      }, 10000);
+      
+    } else {
+      toast({
+        title: "Speech Recognition Not Supported",
+        description: "Your browser doesn't support speech recognition.",
+        variant: "destructive"
+      });
     }
-  }, [conversation.isSpeaking, onSpeakingChange]);
+  };
 
-  // Mock configuration for demo - replace with actual API key input
   useEffect(() => {
-    // In production, you would collect these from user input or environment
-    const mockApiKey = "your-elevenlabs-api-key";
-    const mockAgentId = "your-agent-id";
-    
-    if (mockApiKey && mockAgentId) {
-      setApiKey(mockApiKey);
-      setAgentId(mockAgentId);
-      setIsConfigured(true);
+    // Initialize speech synthesis voices
+    if ('speechSynthesis' in window) {
+      const loadVoices = () => {
+        const voices = speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          setIsInitialized(true);
+        }
+      };
+
+      loadVoices();
+      speechSynthesis.onvoiceschanged = loadVoices;
     }
   }, []);
 
-  const startConversation = async () => {
-    if (!isConfigured) {
-      toast({
-        title: "Configuration Required",
-        description: "Please configure your ElevenLabs API key and Agent ID.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      // For demo purposes, we'll simulate the conversation
-      // In production, replace with actual ElevenLabs conversation start
-      console.log("Starting conversation with ElevenLabs");
-      onListeningChange(true);
-      
-      // Mock: simulate listening for 3 seconds then stop
-      setTimeout(() => {
-        onListeningChange(false);
-        onTranscript("Hello MentorAI, I'd like to learn about machine learning.");
-      }, 3000);
-      
-    } catch (error) {
-      console.error("Failed to start conversation:", error);
-      toast({
-        title: "Connection Failed",
-        description: "Unable to connect to ElevenLabs. Please check your configuration.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const endConversation = async () => {
-    try {
-      await conversation.endSession();
-      onSpeakingChange(false);
-      onListeningChange(false);
-    } catch (error) {
-      console.error("Failed to end conversation:", error);
-    }
-  };
-
   return {
-    startConversation,
-    endConversation,
-    status: conversation.status,
-    isConfigured
+    speak,
+    startListening,
+    isInitialized
   };
 };

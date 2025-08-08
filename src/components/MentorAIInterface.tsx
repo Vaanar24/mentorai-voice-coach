@@ -1,65 +1,59 @@
 import { useState, useCallback } from "react";
-import { MessageHistory, Message } from "./MessageHistory";
 import { VoiceInput } from "./VoiceInput";
-import { LearningContext } from "./LearningContext";
-import { AIAvatar } from "./AIAvatar";
+import { Avatar3D } from "./Avatar3D";
+import { ElevenLabsVoice } from "./ElevenLabsVoice";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Brain, Settings } from "lucide-react";
+import { Sparkles, Brain } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-// Mock webhook function - replace with actual webhook call
-const mockWebhookCall = async (userMessage: string): Promise<string> => {
-  // Simulate API delay
+// Mock AI response function
+const mockAIResponse = async (userMessage: string): Promise<string> => {
   await new Promise(resolve => setTimeout(resolve, 1500));
   
-  // Mock responses based on keywords
   if (userMessage.toLowerCase().includes("quantum")) {
-    return "Quantum physics is fascinating! Quantum entanglement is a phenomenon where two particles become connected in such a way that the quantum state of each particle cannot be described independently. When you measure one particle, you instantly know the state of the other, regardless of the distance between them. Think of it like having two magical coins that always land on opposite sides - if one shows heads, the other will always show tails, no matter how far apart they are!";
+    return "Quantum physics involves the study of matter and energy at the smallest scales, where particles behave in ways that seem impossible in our everyday world.";
   }
   
   if (userMessage.toLowerCase().includes("calculus")) {
-    return "Calculus is the mathematical study of change and motion! It has two main branches: differential calculus (dealing with rates of change and slopes) and integral calculus (dealing with areas and accumulation). Think of derivatives as asking 'how fast is something changing right now?' and integrals as asking 'how much has accumulated over time?' It's like being able to precisely measure the speed of a car at any instant, or calculate exactly how far it traveled.";
+    return "Calculus is the mathematical study of change and motion, with two main branches: differential and integral calculus.";
   }
 
-  return `That's an excellent question! I understand you're asking about "${userMessage}". Let me break this down for you in a way that's easy to understand. This topic involves several key concepts that build upon each other. Would you like me to start with the fundamentals, or do you have a specific aspect you'd like to explore first?`;
+  return `That's an interesting question about "${userMessage}". Let me explain the key concepts and help you understand this topic better.`;
 };
 
 export const MentorAIInterface = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
 
   const handleUserMessage = useCallback(async (content: string) => {
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      content,
-      sender: "user",
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
 
     try {
-      // Call webhook (mocked for demo)
-      const aiResponse = await mockWebhookCall(content);
+      // Get AI response
+      const aiResponse = await mockAIResponse(content);
       
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        content: aiResponse,
-        sender: "ai",
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      console.error("Error calling webhook:", error);
+      // Speak the response using Web Speech API
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(aiResponse);
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        speechSynthesis.speak(utterance);
+      }
+      
       toast({
-        title: "Connection Error",
-        description: "Unable to reach MentorAI. Please try again.",
+        title: "Message Processed",
+        description: `You asked: "${content}"`
+      });
+      
+    } catch (error) {
+      console.error("Error processing message:", error);
+      toast({
+        title: "Processing Error",
+        description: "Unable to process your message. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -67,24 +61,13 @@ export const MentorAIInterface = () => {
     }
   }, []);
 
-  const handlePlayAudio = useCallback(async (content: string) => {
-    // Mock audio playback with avatar lip sync
-    const messageId = `audio-${Date.now()}`;
-    setPlayingAudioId(messageId);
-    setIsSpeaking(true);
-    
-    // Simulate audio duration with speaking animation
-    const duration = Math.max(3000, content.length * 50); // Estimate based on text length
-    setTimeout(() => {
-      setPlayingAudioId(null);
-      setIsSpeaking(false);
-    }, duration);
+  // Initialize voice service
+  const voiceService = ElevenLabsVoice({
+    onSpeakingChange: setIsSpeaking,
+    onListeningChange: setIsListening,
+    onTranscript: handleUserMessage
+  });
 
-    toast({
-      title: "Audio Playback",
-      description: "MentorAI is speaking with lip sync animation."
-    });
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-background flex flex-col">
@@ -97,70 +80,66 @@ export const MentorAIInterface = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">MentorAI</h1>
-              <p className="text-sm text-muted-foreground">Your Personal Training Mentor</p>
+              <p className="text-sm text-muted-foreground">Your 3D Interactive Training Mentor</p>
             </div>
           </div>
           
           <Badge variant="outline" className="border-primary/30 text-primary">
             <Sparkles className="w-3 h-3 mr-1" />
-            Active Learning Mode
+            Voice Mode Active
           </Badge>
         </div>
       </header>
 
-      <div className="flex-1 max-w-7xl mx-auto w-full flex gap-6 p-6">
-        {/* AI Avatar Section */}
-        <div className="w-80 flex flex-col">
-          <Card className="p-6 bg-gradient-card border-primary/10 shadow-card">
-            <AIAvatar 
-              isSpeaking={isSpeaking}
-              isListening={isListening}
-              className="w-full"
-            />
-          </Card>
-          
-          {/* Voice Input Area */}
-          <Card className="mt-4 p-6 bg-gradient-card border-primary/10 shadow-card">
-            <VoiceInput 
-              onTranscript={handleUserMessage}
-              isLoading={isLoading}
-            />
-          </Card>
-        </div>
-
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col">
-          <Card className="flex-1 flex flex-col bg-gradient-card border-primary/10 shadow-card overflow-hidden">
-            <MessageHistory 
-              messages={messages}
-              onPlayAudio={handlePlayAudio}
-              isPlayingAudio={playingAudioId}
-            />
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="w-80 flex flex-col gap-4">
-          <LearningContext onSuggestionClick={handleUserMessage} />
-          
-          {/* Status Card */}
-          <Card className="p-4 bg-gradient-card border-primary/10 shadow-card">
-            <h3 className="font-semibold text-foreground mb-2">Session Status</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Messages:</span>
-                <span className="text-foreground">{messages.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Mode:</span>
-                <span className="text-primary">Voice Interactive</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Status:</span>
-                <span className="text-secondary">Ready</span>
-              </div>
+      {/* Main Interface */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-4xl">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+            
+            {/* 3D Avatar */}
+            <div className="lg:col-span-2">
+              <Card className="h-full bg-gradient-card border-primary/10 shadow-card p-6">
+                <Avatar3D 
+                  isSpeaking={isSpeaking}
+                  isListening={isListening}
+                />
+              </Card>
             </div>
-          </Card>
+
+            {/* Voice Controls */}
+            <div className="flex flex-col gap-4">
+              <Card className="p-6 bg-gradient-card border-primary/10 shadow-card">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Voice Interaction</h3>
+                <VoiceInput 
+                  onTranscript={handleUserMessage}
+                  isLoading={isLoading}
+                />
+              </Card>
+
+              {/* Status */}
+              <Card className="p-4 bg-gradient-card border-primary/10 shadow-card">
+                <h3 className="font-semibold text-foreground mb-2">Status</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Mode:</span>
+                    <span className="text-primary">3D Voice Interactive</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Status:</span>
+                    <span className={`${isSpeaking ? 'text-secondary' : isListening ? 'text-accent' : 'text-primary'}`}>
+                      {isSpeaking ? 'Speaking' : isListening ? 'Listening' : 'Ready'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Voice:</span>
+                    <span className="text-secondary">
+                      {voiceService.isInitialized ? 'Available' : 'Initializing...'}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
