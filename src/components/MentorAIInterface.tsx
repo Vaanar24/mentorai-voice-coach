@@ -2,9 +2,10 @@ import { useState, useCallback } from "react";
 import { MessageHistory, Message } from "./MessageHistory";
 import { VoiceInput } from "./VoiceInput";
 import { LearningContext } from "./LearningContext";
+import { AIAvatar } from "./AIAvatar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Brain } from "lucide-react";
+import { Sparkles, Brain, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 // Mock webhook function - replace with actual webhook call
@@ -28,6 +29,8 @@ export const MentorAIInterface = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   const handleUserMessage = useCallback(async (content: string) => {
     const userMessage: Message = {
@@ -65,18 +68,21 @@ export const MentorAIInterface = () => {
   }, []);
 
   const handlePlayAudio = useCallback(async (content: string) => {
-    // Mock audio playback - replace with ElevenLabs integration
+    // Mock audio playback with avatar lip sync
     const messageId = `audio-${Date.now()}`;
     setPlayingAudioId(messageId);
+    setIsSpeaking(true);
     
-    // Simulate audio duration
+    // Simulate audio duration with speaking animation
+    const duration = Math.max(3000, content.length * 50); // Estimate based on text length
     setTimeout(() => {
       setPlayingAudioId(null);
-    }, 3000);
+      setIsSpeaking(false);
+    }, duration);
 
     toast({
       title: "Audio Playback",
-      description: "This would play the message using ElevenLabs TTS."
+      description: "MentorAI is speaking with lip sync animation."
     });
   }, []);
 
@@ -102,7 +108,26 @@ export const MentorAIInterface = () => {
         </div>
       </header>
 
-      <div className="flex-1 max-w-6xl mx-auto w-full flex gap-6 p-6">
+      <div className="flex-1 max-w-7xl mx-auto w-full flex gap-6 p-6">
+        {/* AI Avatar Section */}
+        <div className="w-80 flex flex-col">
+          <Card className="p-6 bg-gradient-card border-primary/10 shadow-card">
+            <AIAvatar 
+              isSpeaking={isSpeaking}
+              isListening={isListening}
+              className="w-full"
+            />
+          </Card>
+          
+          {/* Voice Input Area */}
+          <Card className="mt-4 p-6 bg-gradient-card border-primary/10 shadow-card">
+            <VoiceInput 
+              onTranscript={handleUserMessage}
+              isLoading={isLoading}
+            />
+          </Card>
+        </div>
+
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col">
           <Card className="flex-1 flex flex-col bg-gradient-card border-primary/10 shadow-card overflow-hidden">
@@ -111,14 +136,6 @@ export const MentorAIInterface = () => {
               onPlayAudio={handlePlayAudio}
               isPlayingAudio={playingAudioId}
             />
-            
-            {/* Voice Input Area */}
-            <div className="border-t border-border/50 p-6 bg-background/50 backdrop-blur-sm">
-              <VoiceInput 
-                onTranscript={handleUserMessage}
-                isLoading={isLoading}
-              />
-            </div>
           </Card>
         </div>
 

@@ -14,8 +14,25 @@ export const VoiceInput = ({ onTranscript, isLoading = false }: VoiceInputProps)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
+  const requestMicrophonePermission = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      return true;
+    } catch (error) {
+      console.error("Microphone permission denied:", error);
+      return false;
+    }
+  };
+
   const startRecording = async () => {
     try {
+      // First check if we have permission
+      const hasPermission = await requestMicrophonePermission();
+      if (!hasPermission) {
+        alert("Microphone access is required for voice interaction. Please allow microphone access and try again.");
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -45,6 +62,7 @@ export const VoiceInput = ({ onTranscript, isLoading = false }: VoiceInputProps)
       setIsRecording(true);
     } catch (error) {
       console.error("Error starting recording:", error);
+      alert("Unable to access microphone. Please check your browser permissions and try again.");
     }
   };
 
