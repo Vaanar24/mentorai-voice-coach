@@ -76,6 +76,7 @@ export const MentorAIInterface = () => {
   // ElevenLabs Conversational AI
   const conversation = useConversation({
     onConnect: () => {
+      console.log("✅ ElevenLabs conversation connected!");
       setIsConvAIActive(true);
       toast({
         title: "AI Connected",
@@ -83,6 +84,7 @@ export const MentorAIInterface = () => {
       });
     },
     onDisconnect: () => {
+      console.log("❌ ElevenLabs conversation disconnected!");
       setIsConvAIActive(false);
       setIsSpeaking(false);
       setIsListening(false);
@@ -92,13 +94,13 @@ export const MentorAIInterface = () => {
       });
     },
     onMessage: (message) => {
-      console.log("Conversation message:", message);
+      console.log("📝 Conversation message:", message);
     },
     onError: (error) => {
-      console.error("Conversation error:", error);
+      console.error("🚨 Conversation error:", error);
       toast({
         title: "Connection Error",
-        description: "Failed to connect to AI mentor",
+        description: typeof error === 'string' ? error : "Failed to connect to AI mentor",
         variant: "destructive"
       });
     }
