@@ -4,8 +4,10 @@ import { Avatar3D } from "./Avatar3D";
 import { ElevenLabsVoice } from "./ElevenLabsVoice";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Brain } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sparkles, Brain, Phone, PhoneOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useConversation } from "@11labs/react";
 
 // AI Response function using Supabase Edge Function
 const getAIResponse = async (userMessage: string): Promise<string> => {
@@ -69,6 +71,38 @@ export const MentorAIInterface = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isConvAIActive, setIsConvAIActive] = useState(false);
+
+  // ElevenLabs Conversational AI
+  const conversation = useConversation({
+    onConnect: () => {
+      setIsConvAIActive(true);
+      toast({
+        title: "AI Connected",
+        description: "You can now talk to your mentor!"
+      });
+    },
+    onDisconnect: () => {
+      setIsConvAIActive(false);
+      setIsSpeaking(false);
+      setIsListening(false);
+      toast({
+        title: "AI Disconnected",
+        description: "Conversation ended"
+      });
+    },
+    onMessage: (message) => {
+      console.log("Conversation message:", message);
+    },
+    onError: (error) => {
+      console.error("Conversation error:", error);
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect to AI mentor",
+        variant: "destructive"
+      });
+    }
+  });
 
   const handleUserMessage = useCallback(async (content: string) => {
     setIsLoading(true);
@@ -111,6 +145,30 @@ export const MentorAIInterface = () => {
     onTranscript: handleUserMessage
   });
 
+  const startElevenLabsConversation = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      await conversation.startSession({
+        agentId: "agent_3201k24jd1w3fk99s1efmtyf6a2v"
+      });
+    } catch (error) {
+      console.error("Failed to start conversation:", error);
+      toast({
+        title: "Microphone Error",
+        description: "Please allow microphone access to use voice chat",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const endElevenLabsConversation = async () => {
+    try {
+      await conversation.endSession();
+    } catch (error) {
+      console.error("Failed to end conversation:", error);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-background flex flex-col">
@@ -127,9 +185,9 @@ export const MentorAIInterface = () => {
             </div>
           </div>
           
-          <Badge variant="outline" className="border-primary/30 text-primary">
+          <Badge variant="outline" className={`border-primary/30 ${isConvAIActive ? 'text-green-600 border-green-500/30' : 'text-primary'}`}>
             <Sparkles className="w-3 h-3 mr-1" />
-            Voice Mode Active
+            {isConvAIActive ? 'AI Connected' : 'Voice Mode Active'}
           </Badge>
         </div>
       </header>
@@ -143,8 +201,8 @@ export const MentorAIInterface = () => {
             <div className="lg:col-span-2">
               <Card className="h-full bg-gradient-card border-primary/10 shadow-card p-6">
                 <Avatar3D 
-                  isSpeaking={isSpeaking}
-                  isListening={isListening}
+                  isSpeaking={isConvAIActive ? conversation.isSpeaking : isSpeaking}
+                  isListening={isConvAIActive ? !conversation.isSpeaking : isListening}
                 />
               </Card>
             </div>
@@ -153,10 +211,46 @@ export const MentorAIInterface = () => {
             <div className="flex flex-col gap-4">
               <Card className="p-6 bg-gradient-card border-primary/10 shadow-card">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Voice Interaction</h3>
-                <VoiceInput 
-                  onTranscript={handleUserMessage}
-                  isLoading={isLoading}
-                />
+                
+                {/* ElevenLabs ConvAI Controls */}
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={startElevenLabsConversation}
+                      disabled={isConvAIActive || conversation.status === "connecting"}
+                      className="flex-1"
+                      variant={isConvAIActive ? "secondary" : "default"}
+                    >
+                      <Phone className="w-4 h-4 mr-2" />
+                      {conversation.status === "connecting" ? "Connecting..." : "Start AI Chat"}
+                    </Button>
+                    
+                    <Button 
+                      onClick={endElevenLabsConversation}
+                      disabled={!isConvAIActive}
+                      variant="outline"
+                    >
+                      <PhoneOff className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  {isConvAIActive && (
+                    <div className="text-sm text-muted-foreground text-center">
+                      <span className={`inline-block w-2 h-2 rounded-full mr-2 ${conversation.isSpeaking ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                      {conversation.isSpeaking ? 'AI is speaking...' : 'Listening...'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Fallback to regular voice input when ConvAI is not active */}
+                {!isConvAIActive && (
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <VoiceInput 
+                      onTranscript={handleUserMessage}
+                      isLoading={isLoading}
+                    />
+                  </div>
+                )}
               </Card>
             </div>
           </div>
