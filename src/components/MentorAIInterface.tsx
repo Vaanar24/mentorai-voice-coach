@@ -150,20 +150,34 @@ export const MentorAIInterface = () => {
   const startElevenLabsConversation = async () => {
     try {
       console.log("Requesting microphone access...");
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log("✅ Microphone access granted");
       
       console.log("Starting ElevenLabs conversation with agent ID:", "agent_3201k24jd1w3fk99s1efmtyf6a2v");
       const conversationId = await conversation.startSession({
         agentId: "agent_3201k24jd1w3fk99s1efmtyf6a2v"
       });
       
-      console.log("Conversation started successfully, ID:", conversationId);
+      console.log("✅ Conversation started successfully, ID:", conversationId);
+      setIsListening(true);
       
     } catch (error) {
-      console.error("Failed to start conversation:", error);
+      console.error("❌ Failed to start conversation:", error);
+      
+      let errorMessage = "Failed to start conversation";
+      if (error instanceof Error) {
+        if (error.message.includes("Permission denied")) {
+          errorMessage = "Microphone access denied. Please allow microphone access and try again.";
+        } else if (error.message.includes("agent")) {
+          errorMessage = "Invalid agent configuration. Please check your settings.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Connection Error",
-        description: error instanceof Error ? error.message : "Failed to start conversation",
+        description: errorMessage,
         variant: "destructive"
       });
     }

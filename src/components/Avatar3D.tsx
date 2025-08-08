@@ -47,22 +47,22 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
 
   return (
     <group ref={meshRef} position={[0, -0.5, 0]} scale={[1, 1, 1]}>
-      {/* Human-like head */}
+      {/* Human-like head - fair skin tone */}
       <mesh position={[0, 1.8, 0]}>
         <sphereGeometry args={[0.35, 32, 32]} />
         <meshStandardMaterial 
-          color="#E8C5A0" 
-          roughness={0.3}
-          metalness={0.1}
+          color="#F5E6D3" 
+          roughness={0.2}
+          metalness={0.05}
         />
       </mesh>
       
-      {/* Hair */}
+      {/* Blonde Hair */}
       <mesh position={[0, 2.05, -0.05]}>
         <sphereGeometry args={[0.38, 32, 32]} />
         <meshStandardMaterial 
-          color="#4A3B2A" 
-          roughness={0.8}
+          color="#E6D0A3" 
+          roughness={0.6}
           metalness={0.1}
         />
       </mesh>
@@ -70,15 +70,15 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
       {/* Neck */}
       <mesh position={[0, 1.35, 0]}>
         <cylinderGeometry args={[0.12, 0.15, 0.3, 16]} />
-        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
+        <meshStandardMaterial color="#F5E6D3" roughness={0.2} metalness={0.05} />
       </mesh>
       
-      {/* Body - Professional shirt */}
+      {/* Body - Professional light colored top */}
       <mesh position={[0, 0.8, 0]}>
         <cylinderGeometry args={[0.3, 0.4, 1.2, 16]} />
         <meshStandardMaterial 
-          color={isSpeaking ? "#2563EB" : "#1E40AF"} 
-          roughness={0.2}
+          color={isSpeaking ? "#E8EAF6" : "#F3E5F5"} 
+          roughness={0.3}
           metalness={0.1}
         />
       </mesh>
@@ -86,21 +86,21 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
       {/* Arms */}
       <mesh position={[-0.5, 1.1, 0]} rotation={[0, 0, 0.2]}>
         <cylinderGeometry args={[0.08, 0.1, 0.9, 16]} />
-        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
+        <meshStandardMaterial color="#F5E6D3" roughness={0.2} metalness={0.05} />
       </mesh>
       <mesh position={[0.5, 1.1, 0]} rotation={[0, 0, -0.2]}>
         <cylinderGeometry args={[0.08, 0.1, 0.9, 16]} />
-        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
+        <meshStandardMaterial color="#F5E6D3" roughness={0.2} metalness={0.05} />
       </mesh>
       
       {/* Hands */}
       <mesh position={[-0.65, 0.5, 0]}>
         <sphereGeometry args={[0.08, 16, 16]} />
-        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
+        <meshStandardMaterial color="#F5E6D3" roughness={0.2} metalness={0.05} />
       </mesh>
       <mesh position={[0.65, 0.5, 0]}>
         <sphereGeometry args={[0.08, 16, 16]} />
-        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
+        <meshStandardMaterial color="#F5E6D3" roughness={0.2} metalness={0.05} />
       </mesh>
       
       {/* Legs - Professional pants */}
@@ -123,24 +123,24 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
         <meshStandardMaterial color="#000000" roughness={0.1} metalness={0.8} />
       </mesh>
       
-      {/* Eyes */}
+      {/* Eyes - Blue eyes like reference */}
       <mesh position={[-0.12, 1.85, 0.3]}>
         <sphereGeometry args={[0.05, 16, 16]} />
         <meshBasicMaterial 
-          color={isSpeaking ? "#00FF00" : isListening ? "#FF6B00" : "#0088FF"} 
+          color={isSpeaking ? "#4A90E2" : isListening ? "#5BA0F2" : "#4A90E2"} 
         />
       </mesh>
       <mesh position={[0.12, 1.85, 0.3]}>
         <sphereGeometry args={[0.05, 16, 16]} />
         <meshBasicMaterial 
-          color={isSpeaking ? "#00FF00" : isListening ? "#FF6B00" : "#0088FF"} 
+          color={isSpeaking ? "#4A90E2" : isListening ? "#5BA0F2" : "#4A90E2"} 
         />
       </mesh>
 
       {/* Nose */}
       <mesh position={[0, 1.75, 0.32]}>
         <coneGeometry args={[0.03, 0.08, 8]} />
-        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
+        <meshStandardMaterial color="#F5E6D3" roughness={0.2} metalness={0.05} />
       </mesh>
 
       {/* Mouth indicator */}
