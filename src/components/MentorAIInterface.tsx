@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { VoiceInput } from "./VoiceInput";
 import { Avatar3D } from "./Avatar3D";
 import { ElevenLabsVoice } from "./ElevenLabsVoice";
