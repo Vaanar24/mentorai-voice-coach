@@ -45,68 +45,118 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
   });
 
   return (
-    <group ref={meshRef} position={[0, -1.5, 0]} scale={[1.5, 1.5, 1.5]}>
-      {/* Head */}
+    <group ref={meshRef} position={[0, -1.2, 0]} scale={[1.2, 1.2, 1.2]}>
+      {/* Human-like head */}
       <mesh position={[0, 1.8, 0]}>
-        <sphereGeometry args={[0.3, 32, 32]} />
+        <sphereGeometry args={[0.35, 32, 32]} />
         <meshStandardMaterial 
-          color={isSpeaking ? "#4F8FF7" : isListening ? "#F7B94F" : "#6B7280"} 
-          roughness={0.1}
-          metalness={0.8}
+          color="#E8C5A0" 
+          roughness={0.3}
+          metalness={0.1}
         />
       </mesh>
       
-      {/* Body */}
-      <mesh position={[0, 1, 0]}>
-        <cylinderGeometry args={[0.25, 0.35, 1, 32]} />
+      {/* Hair */}
+      <mesh position={[0, 2.05, -0.05]}>
+        <sphereGeometry args={[0.38, 32, 32]} />
         <meshStandardMaterial 
-          color="#4F8FF7" 
+          color="#4A3B2A" 
+          roughness={0.8}
+          metalness={0.1}
+        />
+      </mesh>
+      
+      {/* Neck */}
+      <mesh position={[0, 1.35, 0]}>
+        <cylinderGeometry args={[0.12, 0.15, 0.3, 16]} />
+        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
+      </mesh>
+      
+      {/* Body - Professional shirt */}
+      <mesh position={[0, 0.8, 0]}>
+        <cylinderGeometry args={[0.3, 0.4, 1.2, 16]} />
+        <meshStandardMaterial 
+          color={isSpeaking ? "#2563EB" : "#1E40AF"} 
           roughness={0.2}
-          metalness={0.7}
+          metalness={0.1}
         />
       </mesh>
       
       {/* Arms */}
-      <mesh position={[-0.45, 1.2, 0]} rotation={[0, 0, 0.3]}>
-        <cylinderGeometry args={[0.08, 0.1, 0.8, 16]} />
-        <meshStandardMaterial color="#6B7280" roughness={0.3} metalness={0.6} />
+      <mesh position={[-0.5, 1.1, 0]} rotation={[0, 0, 0.2]}>
+        <cylinderGeometry args={[0.08, 0.1, 0.9, 16]} />
+        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
       </mesh>
-      <mesh position={[0.45, 1.2, 0]} rotation={[0, 0, -0.3]}>
-        <cylinderGeometry args={[0.08, 0.1, 0.8, 16]} />
-        <meshStandardMaterial color="#6B7280" roughness={0.3} metalness={0.6} />
+      <mesh position={[0.5, 1.1, 0]} rotation={[0, 0, -0.2]}>
+        <cylinderGeometry args={[0.08, 0.1, 0.9, 16]} />
+        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
       </mesh>
       
-      {/* Legs */}
-      <mesh position={[-0.15, 0.2, 0]}>
-        <cylinderGeometry args={[0.1, 0.12, 0.8, 16]} />
-        <meshStandardMaterial color="#6B7280" roughness={0.3} metalness={0.6} />
+      {/* Hands */}
+      <mesh position={[-0.65, 0.5, 0]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
+        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
       </mesh>
-      <mesh position={[0.15, 0.2, 0]}>
-        <cylinderGeometry args={[0.1, 0.12, 0.8, 16]} />
-        <meshStandardMaterial color="#6B7280" roughness={0.3} metalness={0.6} />
+      <mesh position={[0.65, 0.5, 0]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
+        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
+      </mesh>
+      
+      {/* Legs - Professional pants */}
+      <mesh position={[-0.15, -0.1, 0]}>
+        <cylinderGeometry args={[0.12, 0.14, 1.0, 16]} />
+        <meshStandardMaterial color="#1F2937" roughness={0.4} metalness={0.1} />
+      </mesh>
+      <mesh position={[0.15, -0.1, 0]}>
+        <cylinderGeometry args={[0.12, 0.14, 1.0, 16]} />
+        <meshStandardMaterial color="#1F2937" roughness={0.4} metalness={0.1} />
+      </mesh>
+      
+      {/* Shoes */}
+      <mesh position={[-0.15, -0.75, 0.1]}>
+        <boxGeometry args={[0.2, 0.1, 0.3]} />
+        <meshStandardMaterial color="#000000" roughness={0.1} metalness={0.8} />
+      </mesh>
+      <mesh position={[0.15, -0.75, 0.1]}>
+        <boxGeometry args={[0.2, 0.1, 0.3]} />
+        <meshStandardMaterial color="#000000" roughness={0.1} metalness={0.8} />
       </mesh>
       
       {/* Eyes */}
-      <mesh position={[-0.1, 1.85, 0.25]}>
-        <sphereGeometry args={[0.04, 16, 16]} />
+      <mesh position={[-0.12, 1.85, 0.3]}>
+        <sphereGeometry args={[0.05, 16, 16]} />
         <meshBasicMaterial 
           color={isSpeaking ? "#00FF00" : isListening ? "#FF6B00" : "#0088FF"} 
         />
       </mesh>
-      <mesh position={[0.1, 1.85, 0.25]}>
-        <sphereGeometry args={[0.04, 16, 16]} />
+      <mesh position={[0.12, 1.85, 0.3]}>
+        <sphereGeometry args={[0.05, 16, 16]} />
         <meshBasicMaterial 
           color={isSpeaking ? "#00FF00" : isListening ? "#FF6B00" : "#0088FF"} 
         />
       </mesh>
 
+      {/* Nose */}
+      <mesh position={[0, 1.75, 0.32]}>
+        <coneGeometry args={[0.03, 0.08, 8]} />
+        <meshStandardMaterial color="#E8C5A0" roughness={0.3} metalness={0.1} />
+      </mesh>
+
       {/* Mouth indicator */}
-      {isSpeaking && (
-        <mesh position={[0, 1.7, 0.25]}>
-          <sphereGeometry args={[0.05, 16, 16]} />
-          <meshBasicMaterial color="#FF4444" />
-        </mesh>
-      )}
+      <mesh position={[0, 1.65, 0.32]}>
+        <sphereGeometry args={[isSpeaking ? 0.06 : 0.03, 16, 8]} />
+        <meshBasicMaterial 
+          color={isSpeaking ? "#FF4444" : "#CC6666"}
+          transparent={true}
+          opacity={isSpeaking ? 1.0 : 0.7}
+        />
+      </mesh>
+
+      {/* Professional tie */}
+      <mesh position={[0, 0.9, 0.35]}>
+        <boxGeometry args={[0.08, 0.6, 0.02]} />
+        <meshStandardMaterial color="#8B0000" roughness={0.2} metalness={0.3} />
+      </mesh>
     </group>
   );
 }

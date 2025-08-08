@@ -115,29 +115,6 @@ export const MentorAIInterface = () => {
                   isLoading={isLoading}
                 />
               </Card>
-
-              {/* Status */}
-              <Card className="p-4 bg-gradient-card border-primary/10 shadow-card">
-                <h3 className="font-semibold text-foreground mb-2">Status</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Mode:</span>
-                    <span className="text-primary">3D Voice Interactive</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status:</span>
-                    <span className={`${isSpeaking ? 'text-secondary' : isListening ? 'text-accent' : 'text-primary'}`}>
-                      {isSpeaking ? 'Speaking' : isListening ? 'Listening' : 'Ready'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Voice:</span>
-                    <span className="text-secondary">
-                      {voiceService.isInitialized ? 'Available' : 'Initializing...'}
-                    </span>
-                  </div>
-                </div>
-              </Card>
             </div>
           </div>
         </div>
