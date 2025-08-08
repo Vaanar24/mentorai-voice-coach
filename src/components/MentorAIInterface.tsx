@@ -203,6 +203,7 @@ export const MentorAIInterface = () => {
                 <Avatar3D 
                   isSpeaking={isConvAIActive ? conversation.isSpeaking : isSpeaking}
                   isListening={isConvAIActive ? !conversation.isSpeaking : isListening}
+                  onAvatarClick={!isConvAIActive ? startElevenLabsConversation : undefined}
                 />
               </Card>
             </div>
@@ -241,16 +242,6 @@ export const MentorAIInterface = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Fallback to regular voice input when ConvAI is not active */}
-                {!isConvAIActive && (
-                  <div className="mt-4 pt-4 border-t border-border/50">
-                    <VoiceInput 
-                      onTranscript={handleUserMessage}
-                      isLoading={isLoading}
-                    />
-                  </div>
-                )}
               </Card>
             </div>
           </div>

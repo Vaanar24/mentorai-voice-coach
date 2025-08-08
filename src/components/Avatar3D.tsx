@@ -6,6 +6,7 @@ import * as THREE from 'three';
 interface Avatar3DProps {
   isSpeaking: boolean;
   isListening: boolean;
+  onAvatarClick?: () => void;
 }
 
 // 3D Avatar Model Component
@@ -161,9 +162,12 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
   );
 }
 
-export const Avatar3D = ({ isSpeaking, isListening }: Avatar3DProps) => {
+export const Avatar3D = ({ isSpeaking, isListening, onAvatarClick }: Avatar3DProps) => {
   return (
-    <div className="w-full h-96 bg-gradient-card rounded-lg overflow-hidden border border-primary/20">
+    <div 
+      className="w-full h-96 bg-gradient-card rounded-lg overflow-hidden border border-primary/20 cursor-pointer hover:border-primary/40 transition-colors"
+      onClick={onAvatarClick}
+    >
       <Canvas>
         <PerspectiveCamera makeDefault position={[0, 1, 5]} fov={50} />
         
@@ -203,7 +207,7 @@ export const Avatar3D = ({ isSpeaking, isListening }: Avatar3DProps) => {
       {/* Status overlay */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-background/80 backdrop-blur-sm rounded-full border border-primary/30">
         <p className="text-sm text-foreground font-medium">
-          {isSpeaking ? "🎤 Speaking..." : isListening ? "👂 Listening..." : "💭 Ready"}
+          {isSpeaking ? "🎤 Speaking..." : isListening ? "👂 Listening..." : onAvatarClick ? "👋 Click to start conversation" : "💭 Ready"}
         </p>
       </div>
     </div>
