@@ -45,7 +45,7 @@ function AvatarModel({ isSpeaking, isListening }: { isSpeaking: boolean; isListe
   });
 
   return (
-    <group ref={meshRef} position={[0, -1.2, 0]} scale={[1.2, 1.2, 1.2]}>
+    <group ref={meshRef} position={[0, -0.5, 0]} scale={[1, 1, 1]}>
       {/* Human-like head */}
       <mesh position={[0, 1.8, 0]}>
         <sphereGeometry args={[0.35, 32, 32]} />
@@ -165,7 +165,7 @@ export const Avatar3D = ({ isSpeaking, isListening }: Avatar3DProps) => {
   return (
     <div className="w-full h-96 bg-gradient-card rounded-lg overflow-hidden border border-primary/20">
       <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 0, 4]} />
+        <PerspectiveCamera makeDefault position={[0, 1, 5]} fov={50} />
         
         {/* Lighting */}
         <ambientLight intensity={0.4} />
@@ -189,9 +189,12 @@ export const Avatar3D = ({ isSpeaking, isListening }: Avatar3DProps) => {
         {/* Controls */}
         <OrbitControls 
           enablePan={false}
-          enableZoom={false}
-          minPolarAngle={Math.PI / 3}
-          maxPolarAngle={Math.PI / 1.5}
+          enableZoom={true}
+          minDistance={3}
+          maxDistance={8}
+          minPolarAngle={Math.PI / 4}
+          maxPolarAngle={Math.PI / 1.2}
+          target={[0, 1, 0]}
           autoRotate={!isSpeaking && !isListening}
           autoRotateSpeed={0.5}
         />
